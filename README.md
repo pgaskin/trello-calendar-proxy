@@ -1,4 +1,5 @@
 # trello-calendar-proxy
+[![GoDoc](https://img.shields.io/badge/godoc-reference-blue)](https://godoc.org/github.com/geek1011/trello-calendar-proxy) [![Drone (cloud)](https://img.shields.io/drone/build/geek1011/trello-calendar-proxy)](https://cloud.drone.io/geek1011/trello-calendar-proxy) [![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/geek1011/trello-calendar-proxy)](https://hub.docker.com/r/geek1011/trello-calendar-proxy) [![Deploy](https://img.shields.io/badge/heroku-deploy-%233B2F63)](https://heroku.com/deploy)
 
 ```
 NAME
@@ -26,4 +27,10 @@ FEATURES
 
     Event Recurrence
     -- Event recurrence will be implemented in a future version.
+```
+
+```
+Usage of trello-calendar-proxy:
+  -a, --addr string   The address to bind to (env TRELLO_CALPROXY_ADDR) (default ":8080")
+      --help          Show this help text
 ```
