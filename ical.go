@@ -13,7 +13,7 @@ import (
 // garbage in, garbage out). Note that the line ending is normalized to \r\n for
 // the output, and the lines are wrapped at 75 chars (according to RFC5545
 // section 3.1). Extra blank lines *may* also be removed.
-type ICal []Node
+type ICal []*Node
 
 // Node represents a part of the iCalendar. For convienence, lines with a name
 // of BEGIN have their block's contents put into the Inner slice until the
@@ -21,7 +21,7 @@ type ICal []Node
 type Node struct {
 	Name  string
 	Value string
-	Inner []Node
+	Inner []*Node
 }
 
 func ParseICal(buf []byte) (ICal, error) {
@@ -46,8 +46,8 @@ func denormalize(buf []byte) []string {
 }
 
 // parse parses a normalized slice of nodes.
-func parse(lines []string) ([]Node, error) {
-	var nodes []Node
+func parse(lines []string) ([]*Node, error) {
+	var nodes []*Node
 	for i := 0; i < len(lines); i++ {
 		if lines[i] == "" {
 			continue
@@ -88,22 +88,22 @@ func parse(lines []string) ([]Node, error) {
 }
 
 // parseNode parses a single normalized Node.
-func parseNode(line string) (Node, error) {
+func parseNode(line string) (*Node, error) {
 	var node Node
 	spl := strings.SplitN(line, ":", 2)
 	if len(spl) != 2 {
-		return node, xerrors.Errorf("malformed iCal: expected key-value pair, got %#v", line)
+		return &node, xerrors.Errorf("malformed iCal: expected key-value pair, got %#v", line)
 	}
 	node.Name, node.Value = spl[0], strings.NewReplacer(
 		"\\r", "",
 		"\\n", "\n",
 	).Replace(spl[1])
-	return node, nil
+	return &node, nil
 }
 
 // Bytes encodes the ICal into a byte slice. It will not fail.
 func (ical ICal) Bytes() []byte {
-	return renormalize(encode([]Node(ical)))
+	return renormalize(encode([]*Node(ical)))
 }
 
 // renormalize normalizes the lines for an iCalendar.
@@ -130,7 +130,7 @@ func renormalize(lines []string) []byte {
 }
 
 // encode encodes a slice of nodes.
-func encode(nodes []Node) []string {
+func encode(nodes []*Node) []string {
 	var lines []string
 	for _, node := range nodes {
 		if len(node.Inner) > 0 && node.Name != "BEGIN" {
@@ -142,7 +142,7 @@ func encode(nodes []Node) []string {
 		lines = append(lines, encodeNode(node))
 		if node.Name == "BEGIN" {
 			lines = append(lines, encode(node.Inner)...)
-			lines = append(lines, encodeNode(Node{
+			lines = append(lines, encodeNode(&Node{
 				Name:  "END",
 				Value: node.Value,
 			}))
@@ -152,7 +152,7 @@ func encode(nodes []Node) []string {
 }
 
 // encodeNode encodes a node.
-func encodeNode(node Node) string {
+func encodeNode(node *Node) string {
 	return fmt.Sprintf("%s:%s", node.Name, strings.NewReplacer(
 		"\r", "",
 		"\n", "\\n",

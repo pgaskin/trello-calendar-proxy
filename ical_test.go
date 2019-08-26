@@ -34,9 +34,9 @@ func TestICalAST(t *testing.T) {
 		}
 	})
 	t.Run("InvalidAST", func(t *testing.T) {
-		for _, tc := range [][]Node{
-			{Node{"END", "TEST", nil}},
-			{Node{"ASD", "TEST", []Node{Node{"ASD", "FGH", nil}}}},
+		for _, tc := range [][]*Node{
+			{&Node{"END", "TEST", nil}},
+			{&Node{"ASD", "TEST", []*Node{&Node{"ASD", "FGH", nil}}}},
 		} {
 			var panicked bool
 			func() {
