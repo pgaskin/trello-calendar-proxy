@@ -17,7 +17,7 @@ import (
 // section 3.1). Extra blank lines *may* also be removed.
 type ICal []*Node
 
-// Node represents a part of the iCalendar. For convienence, lines with a name
+// Node represents a part of the iCalendar. For convenience, lines with a name
 // of BEGIN have their block's contents put into the Inner slice until the
 // matching END is reached.
 type Node struct {
@@ -185,7 +185,7 @@ func ICalDuration(t time.Duration) (string, error) {
 	d, t = int(t/(time.Hour*24)), t%(time.Hour*24)
 	h, t = int(t/time.Hour), t%time.Hour
 	m, t = int(t/time.Minute), t%time.Minute
-	s, t = int(t/time.Second), t%time.Second
+	s = int(t / time.Second)
 
 	buf := bytes.NewBuffer(nil)
 	if neg {

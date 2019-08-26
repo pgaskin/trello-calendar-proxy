@@ -1,5 +1,5 @@
 # trello-calendar-proxy
-[![GoDoc](https://img.shields.io/badge/godoc-reference-blue)](https://godoc.org/github.com/geek1011/trello-calendar-proxy) [![Drone (cloud)](https://img.shields.io/drone/build/geek1011/trello-calendar-proxy)](https://cloud.drone.io/geek1011/trello-calendar-proxy) [![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/geek1011/trello-calendar-proxy)](https://hub.docker.com/r/geek1011/trello-calendar-proxy) [![Deploy](https://img.shields.io/badge/heroku-deploy-%233B2F63)](https://heroku.com/deploy)
+[![GoDoc](https://img.shields.io/badge/godoc-reference-blue)](https://godoc.org/github.com/geek1011/trello-calendar-proxy) [![Go Report Card](https://goreportcard.com/badge/github.com/geek1011/trello-calendar-proxy)](https://goreportcard.com/report/github.com/geek1011/trello-calendar-proxy) [![Drone (cloud)](https://img.shields.io/drone/build/geek1011/trello-calendar-proxy)](https://cloud.drone.io/geek1011/trello-calendar-proxy) [![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/geek1011/trello-calendar-proxy)](https://hub.docker.com/r/geek1011/trello-calendar-proxy) [![Deploy](https://img.shields.io/badge/heroku-deploy-blueviolet)](https://heroku.com/deploy)
 
 ```
 NAME
