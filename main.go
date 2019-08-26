@@ -62,6 +62,8 @@ func run(addr string) {
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
+	r.Use(middleware.GetHead)
+	r.Use(middleware.SetHeader("Server", fmt.Sprintf("trello-calendar-proxy (%s)", rev)))
 
 	r.Get("/", readme)
 	r.Get("/calendar/{uid}/{cid}/{token}.ics", transformCalendar)
@@ -75,9 +77,7 @@ func run(addr string) {
 }
 
 func readme(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
-	w.WriteHeader(http.StatusOK)
-	fmt.Fprintf(w, `NAME
+	buf := []byte(fmt.Sprintf(`NAME
     trello-calendar-proxy - Adds additional features to the Trello Calendar Power-Up
 
 SYNOPSIS
@@ -111,7 +111,13 @@ ABOUT
 
     GitHub - https://github.com/geek1011/trello-calendar-proxy
     Revision - %s
-`, rev)
+`, rev))
+	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	w.Header().Set("Content-Length", strconv.Itoa(len(buf)))
+	w.WriteHeader(http.StatusOK)
+	if r.Method != "HEAD" {
+		w.Write(buf)
+	}
 }
 
 func transformCalendar(w http.ResponseWriter, r *http.Request) {
@@ -170,13 +176,17 @@ func transformCalendar(w http.ResponseWriter, r *http.Request) {
 	// TODO: RRULE(only daily/weekly/monthly+count/until)?
 
 	nbuf := ical.Bytes()
+	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Content-Type", "text/calendar; charset=utf-8")
 	w.Header().Set("Content-Length", strconv.Itoa(len(nbuf)))
 	w.Header().Set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate")
 	w.Header().Set("Pragma", "no-cache")
 	w.Header().Set("Expires", "0")
 	w.WriteHeader(http.StatusOK)
-	w.Write(nbuf)
+
+	if r.Method != "HEAD" {
+		w.Write(nbuf)
+	}
 }
 
 func setRefreshTime(ical ICal, dur time.Duration) {
