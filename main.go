@@ -17,6 +17,8 @@ import (
 	"golang.org/x/xerrors"
 )
 
+var rev = "git"
+
 func main() {
 	addr := pflag.StringP("addr", "a", ":8080", "The address to bind to")
 	help := pflag.Bool("help", false, "Show this help text")
@@ -64,6 +66,7 @@ func run(addr string) {
 	r.Get("/", readme)
 	r.Get("/calendar/{uid}/{cid}/{token}.ics", transformCalendar)
 
+	fmt.Printf("trello-calendar-proxy (%s)\n", rev)
 	fmt.Printf("Listening on http://%s\n", addr)
 	if err := http.ListenAndServe(addr, r); err != nil {
 		fmt.Fprintf(os.Stderr, "Error: %v\n", err)
@@ -107,7 +110,8 @@ ABOUT
     MIT License
 
     GitHub - https://github.com/geek1011/trello-calendar-proxy
-`)
+    Revision - %s
+`, rev)
 }
 
 func transformCalendar(w http.ResponseWriter, r *http.Request) {
