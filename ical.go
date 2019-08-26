@@ -3,7 +3,9 @@ package main
 import (
 	"bytes"
 	"fmt"
+	"strconv"
 	"strings"
+	"time"
 
 	"golang.org/x/xerrors"
 )
@@ -22,6 +24,12 @@ type Node struct {
 	Name  string
 	Value string
 	Inner []*Node
+}
+
+// NamePrefix checks if the node name has a prefix. This is useful for names
+// like DTEND, which could be suffixed with a timezone.
+func (n Node) NamePrefix(prefix string) bool {
+	return strings.HasPrefix(n.Name, prefix)
 }
 
 // ParseICal parses an AST from a raw iCalendar.
@@ -158,4 +166,51 @@ func encodeNode(node *Node) string {
 		"\r", "",
 		"\n", "\\n",
 	).Replace(node.Value))
+}
+
+// ICalDuration formats a time.Duration according to https://icalendar.org/iCalendar-RFC-5545/3-3-6-duration.html.
+func ICalDuration(t time.Duration) (string, error) {
+	if t >= time.Hour*24*7 || t <= -(time.Hour*24*7) {
+		return "", xerrors.New("duration too large (must be under 1 week)")
+	} else if t >= -time.Second && t <= time.Second {
+		return "", xerrors.New("duration too small (must be at least 1 second)")
+	}
+
+	var neg bool
+	var d, h, m, s int
+	if t < 0 {
+		t *= -1
+		neg = true
+	}
+	d, t = int(t/(time.Hour*24)), t%(time.Hour*24)
+	h, t = int(t/time.Hour), t%time.Hour
+	m, t = int(t/time.Minute), t%time.Minute
+	s, t = int(t/time.Second), t%time.Second
+
+	buf := bytes.NewBuffer(nil)
+	if neg {
+		buf.WriteRune('-')
+	}
+	buf.WriteRune('P')
+	if d > 0 {
+		buf.WriteString(strconv.Itoa(d))
+		buf.WriteRune('D')
+	}
+	if h > 0 || m > 0 || s > 0 {
+		buf.WriteRune('T')
+		switch {
+		case h > 0:
+			buf.WriteString(strconv.Itoa(h))
+			buf.WriteRune('H')
+			fallthrough
+		case m > 0:
+			buf.WriteString(strconv.Itoa(m))
+			buf.WriteRune('M')
+			fallthrough
+		case s > 0:
+			buf.WriteString(strconv.Itoa(s))
+			buf.WriteRune('S')
+		}
+	}
+	return buf.String(), nil
 }

@@ -2,8 +2,10 @@ package main
 
 import (
 	"bytes"
+	"fmt"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestICalAST(t *testing.T) {
@@ -52,6 +54,38 @@ func TestICalAST(t *testing.T) {
 			}
 		}
 	})
+}
+
+func TestICalDuration(t *testing.T) {
+	for _, tc := range []struct {
+		dur  time.Duration
+		idur string
+	}{
+		{0, ""},
+		{-time.Millisecond, ""},
+		{time.Millisecond, ""},
+		{-(time.Hour*24*7 + 1), ""},
+		{time.Hour*24*7 + 1, ""},
+		{time.Hour * 24, "P1D"},
+		{time.Hour * 23, "PT23H0M0S"},
+		{time.Minute * 59, "PT59M0S"},
+		{time.Second * 59, "PT59S"},
+		{time.Second * 61, "PT1M1S"},
+		{time.Second*61 + time.Hour, "PT1H1M1S"},
+		{time.Second*61 + time.Hour*25, "P1DT1H1M1S"},
+		{-(time.Second*61 + time.Hour*25), "-P1DT1H1M1S"},
+	} {
+		tc := tc
+		t.Run(fmt.Sprintf("%s__%s", tc.dur, tc.idur), func(t *testing.T) {
+			if idur, err := ICalDuration(tc.dur); err != nil && tc.idur != "" {
+				t.Errorf("unexpected error: %v", err)
+			} else if err == nil && tc.idur == "" {
+				t.Error("expected error")
+			} else if tc.idur != idur {
+				t.Errorf("got %s", idur)
+			}
+		})
+	}
 }
 
 // From https://icalendar.org/iCalendar-RFC-5545/4-icalendar-object-examples.html
