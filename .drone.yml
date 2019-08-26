@@ -1,0 +1,8 @@
+kind: pipeline
+name: default
+
+steps:
+- name: test
+  image: golang:1.12
+  commands:
+  - go test -v ./... -coverprofile=/dev/null
