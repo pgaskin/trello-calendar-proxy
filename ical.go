@@ -24,6 +24,7 @@ type Node struct {
 	Inner []*Node
 }
 
+// ParseICal parses an AST from a raw iCalendar.
 func ParseICal(buf []byte) (ICal, error) {
 	nodes, err := parse(denormalize(buf))
 	if err != nil {
