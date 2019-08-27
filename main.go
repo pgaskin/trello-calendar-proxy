@@ -100,6 +100,11 @@ FEATURES
        1d, 2h, 1h30m, 15m30s, and so on. If not specified, the Trello default of
        1h is used.
 
+    Event Location
+    -- A custom event location can be set by adding "Calendar::Location=loc" on
+       its own line (without the quotes) at the top of the card description.
+       Replace loc with the double-quoted location.
+
     Event Recurrence
     -- Event recurrence will be implemented in a future version.
 
@@ -173,6 +178,7 @@ func transformCalendar(w http.ResponseWriter, r *http.Request) {
 
 	setRefreshTime(ical, time.Minute*15)
 	addDurations(ical)
+	addLocations(ical)
 	// TODO: RRULE(only daily/weekly/monthly+count/until)?
 
 	nbuf := ical.Bytes()
@@ -256,5 +262,36 @@ func parseDuration(desc string) (string, error) {
 		return idur, nil
 	default:
 		return "", xerrors.New("multiple durations specified")
+	}
+}
+
+var (
+	locationRe = regexp.MustCompile(`(?:^|\s+)Calendar::Location="([^"]+)"\s*`)
+)
+
+func addLocations(ical ICal) {
+	for _, calendar := range ical {
+		for _, node := range calendar.Inner {
+			if node.Name == "BEGIN" && node.Value == "VEVENT" {
+				var newInner []*Node
+				for _, innerNode := range node.Inner {
+					if innerNode.Name == "DESCRIPTION" {
+						if m := locationRe.FindAllStringSubmatch(innerNode.Value, -1); len(m) > 1 {
+							innerNode.Value += "\n\nwarning: trello-calendar-proxy: parse location: more than one location specified"
+						} else if len(m) > 0 {
+							innerNode.Value = locationRe.ReplaceAllString(innerNode.Value, "")
+							newInner = append(newInner, &Node{
+								Name:  "LOCATION",
+								Value: m[0][1],
+							})
+						}
+					}
+					if !innerNode.NamePrefix("LOCATION") {
+						newInner = append(newInner, innerNode)
+					}
+				}
+				node.Inner = newInner
+			}
+		}
 	}
 }

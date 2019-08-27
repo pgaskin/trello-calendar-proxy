@@ -25,6 +25,11 @@ FEATURES
        1d, 2h, 1h30m, 15m30s, and so on. If not specified, the Trello default of
        1h is used.
 
+    Event Location
+    -- A custom event location can be set by adding "Calendar::Location=loc" on
+       its own line (without the quotes) at the top of the card description.
+       Replace loc with the double-quoted location.
+
     Event Recurrence
     -- Event recurrence will be implemented in a future version.
 ```
