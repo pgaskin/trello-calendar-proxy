@@ -2,12 +2,11 @@ package main
 
 import (
 	"bytes"
+	"errors"
 	"fmt"
 	"strconv"
 	"strings"
 	"time"
-
-	"golang.org/x/xerrors"
 )
 
 // ICal is a simple AST for an iCalendar. The main focus is to be able to
@@ -40,7 +39,7 @@ func ParseICal(buf []byte) (ICal, error) {
 	}
 	for _, node := range nodes {
 		if (node.Name != "BEGIN") || node.Value != "VCALENDAR" {
-			return nil, xerrors.Errorf("expected only VCALENDAR objects in root, got %s:%s", node.Name, node.Value)
+			return nil, fmt.Errorf("expected only VCALENDAR objects in root, got %s:%s", node.Name, node.Value)
 		}
 	}
 	return ICal(nodes), nil
@@ -86,10 +85,10 @@ func parse(lines []string) ([]*Node, error) {
 				}
 			}
 			if !found {
-				return nil, xerrors.Errorf("could not find end for node (%d, %s)", i, lines[i])
+				return nil, fmt.Errorf("could not find end for node (%d, %s)", i, lines[i])
 			}
 		case "END":
-			return nil, xerrors.Errorf("node nesting mismatch (%d, %s)", i, lines[i]) // if wrong end node or unexpected end node
+			return nil, fmt.Errorf("node nesting mismatch (%d, %s)", i, lines[i]) // if wrong end node or unexpected end node
 		}
 		nodes = append(nodes, node)
 	}
@@ -101,7 +100,7 @@ func parseNode(line string) (*Node, error) {
 	var node Node
 	spl := strings.SplitN(line, ":", 2)
 	if len(spl) != 2 {
-		return &node, xerrors.Errorf("malformed iCal: expected key-value pair, got %#v", line)
+		return &node, fmt.Errorf("malformed iCal: expected key-value pair, got %#v", line)
 	}
 	node.Name, node.Value = spl[0], strings.NewReplacer(
 		"\\r", "",
@@ -171,9 +170,9 @@ func encodeNode(node *Node) string {
 // ICalDuration formats a time.Duration according to https://icalendar.org/iCalendar-RFC-5545/3-3-6-duration.html.
 func ICalDuration(t time.Duration) (string, error) {
 	if t >= time.Hour*24*7 || t <= -(time.Hour*24*7) {
-		return "", xerrors.New("duration too large (must be under 1 week)")
+		return "", errors.New("duration too large (must be under 1 week)")
 	} else if t >= -time.Second && t <= time.Second {
-		return "", xerrors.New("duration too small (must be at least 1 second)")
+		return "", errors.New("duration too small (must be at least 1 second)")
 	}
 
 	var neg bool

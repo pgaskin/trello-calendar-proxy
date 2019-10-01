@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -14,7 +15,6 @@ import (
 	"github.com/go-chi/chi"
 	"github.com/go-chi/chi/middleware"
 	"github.com/spf13/pflag"
-	"golang.org/x/xerrors"
 )
 
 var rev = "git"
@@ -210,7 +210,7 @@ func setRefreshTime(ical ICal, dur time.Duration) {
 }
 
 var (
-	errDurationNotFound = xerrors.New("duration not specified in event description")
+	errDurationNotFound = errors.New("duration not specified in event description")
 	durationRe          = regexp.MustCompile(`(?:^|\s+)Calendar::Duration=(\S+)\s*`)
 )
 
@@ -223,7 +223,7 @@ func addDurations(ical ICal) {
 				var err error
 				for _, innerNode := range node.Inner {
 					if innerNode.Name == "DESCRIPTION" {
-						if idur, err = parseDuration(innerNode.Value); err != nil && !xerrors.Is(err, errDurationNotFound) {
+						if idur, err = parseDuration(innerNode.Value); err != nil && !errors.Is(err, errDurationNotFound) {
 							innerNode.Value += fmt.Sprintf("\n\nwarning: trello-calendar-proxy: parse duration: %v", err)
 						}
 						innerNode.Value = durationRe.ReplaceAllString(innerNode.Value, "")
@@ -253,15 +253,15 @@ func parseDuration(desc string) (string, error) {
 	case 1:
 		dur, err := time.ParseDuration(m[0][1])
 		if err != nil {
-			return "", xerrors.Errorf("invalid duration %#v: %w", m[0][1], err)
+			return "", fmt.Errorf("invalid duration %#v: %w", m[0][1], err)
 		}
 		idur, err := ICalDuration(dur)
 		if err != nil {
-			return "", xerrors.Errorf("invalid duration %#v: %w", m[0][1], err)
+			return "", fmt.Errorf("invalid duration %#v: %w", m[0][1], err)
 		}
 		return idur, nil
 	default:
-		return "", xerrors.New("multiple durations specified")
+		return "", errors.New("multiple durations specified")
 	}
 }
 
