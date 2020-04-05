@@ -3,11 +3,11 @@ name: default
 
 steps:
 - name: test
-  image: golang:1.12
+  image: golang:1.14
   commands:
   - go test -v ./... -coverprofile=/dev/null
 - name: build
-  image: golang:1.12
+  image: golang:1.14
   commands:
   - go build -ldflags "-X main.rev=$(git describe --always --tags)"
   - ls -lah trello-calendar-proxy
