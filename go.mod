@@ -1,4 +1,4 @@
-module github.com/geek1011/trello-calendar-proxy
+module github.com/pgaskin/trello-calendar-proxy
 
 go 1.14
 

@@ -1,7 +1,7 @@
 {
     "name": "trello-calendar-proxy",
     "description": "Adds additional features to the Trello Calendar Power-Up.",
-    "repository": "https://github.com/geek1011/trello-calendar-proxy",
+    "repository": "https://github.com/pgaskin/trello-calendar-proxy",
     "keywords": [
         "trello",
         "ical",

@@ -114,7 +114,7 @@ ABOUT
     Copyright 2019 Patrick Gaskin
     MIT License
 
-    GitHub - https://github.com/geek1011/trello-calendar-proxy
+    GitHub - https://github.com/pgaskin/trello-calendar-proxy
     Revision - %s
 `, rev))
 	w.Header().Set("Content-Type", "text/plain; charset=utf-8")
